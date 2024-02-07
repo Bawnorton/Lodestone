@@ -1,4 +1,4 @@
-package com.bawnorton.silkstone;
+package com.bawnorton.silkstone.client;
 
 import net.fabricmc.api.ClientModInitializer;
 

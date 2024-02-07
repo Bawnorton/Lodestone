@@ -1,9 +1,8 @@
 {
 	"required": true,
-	"package": "com.bawnorton.silkstone.mixin.client",
+	"package": "com.bawnorton.silkstone.client.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"ExampleClientMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
