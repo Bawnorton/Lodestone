@@ -1,10 +1,11 @@
 package com.bawnorton.silkstone.client;
 
+import com.bawnorton.silkstone.client.registry.SilkstoneClientRegistries;
 import net.fabricmc.api.ClientModInitializer;
 
 public class SilkstoneClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+		SilkstoneClientRegistries.bootstrap();
 	}
 }

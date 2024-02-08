@@ -33,6 +33,7 @@
 			"environment": "client"
 		}
 	],
+	"accessWidener": "silkstone.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.15.6",
 		"minecraft": "~1.20.1",

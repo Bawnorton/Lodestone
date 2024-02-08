@@ -11,7 +11,7 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
   - [ ] Helpers
   - [ ] Mixins
   - [ ] Networking
-  - [ ] Registries
+  - [x] Registries (Half-impl, waiting on rest)
 - [ ] Systems (For other mods to use)
   - [ ] Block
     - [ ] Block Entities
