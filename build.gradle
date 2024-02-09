@@ -21,10 +21,10 @@ repositories {
 loom {
     splitEnvironmentSourceSets()
 
-	accessWidenerPath = file('src/main/resources/silkstone.accesswidener')
+	accessWidenerPath = file('src/main/resources/lodestone.accesswidener')
 
 	mods {
-		"silkstone" {
+		"lodestone" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}

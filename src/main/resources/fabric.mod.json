@@ -1,39 +1,39 @@
 {
 	"schemaVersion": 1,
-	"id": "silkstone",
+	"id": "lodestone",
 	"version": "${version}",
-	"name": "Silkstone",
+	"name": "Lodestone",
 	"description": "Library for various tasks including creating VFX effects in Minecraft. Ported from Lodestone by SammySemicolon.",
 	"authors": [
 		"Bawnorton",
 		"SammySemicolon"
 	],
 	"contact": {
-		"homepage": "https://github.com/Bawnorton/Silkstone",
-		"sources": "https://github.com/Bawnorton/Silkstone"
+		"homepage": "https://github.com/Bawnorton/Lodestone",
+		"sources": "https://github.com/Bawnorton/Lodestone"
 	},
 	"license": "GPLv3",
-	"icon": "assets/silkstone/icon.png",
+	"icon": "assets/lodestone/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.bawnorton.silkstone.Silkstone"
+			"team.lodestar.lodestone.Lodestone"
 		],
 		"client": [
-          "com.bawnorton.silkstone.client.SilkstoneClient"
+			"team.lodestar.lodestone.client.LodestoneClient"
 		],
 		"fabric-datagen": [
-			"com.bawnorton.silkstone.data.SilkstoneDataGenerator"
+			"team.lodestar.lodestone.data.LodestoneDataGenerator"
 		]
 	},
 	"mixins": [
-		"silkstone.mixins.json",
+		"lodestone.mixins.json",
 		{
-			"config": "silkstone.client.mixins.json",
+			"config": "lodestone.client.mixins.json",
 			"environment": "client"
 		}
 	],
-	"accessWidener": "silkstone.accesswidener",
+	"accessWidener": "lodestone.accesswidener",
 	"depends": {
 		"fabricloader": ">=0.15.6",
 		"minecraft": "~1.20.1",

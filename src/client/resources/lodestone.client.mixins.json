@@ -1,0 +1,22 @@
+{
+	"required": true,
+	"package": "team.lodestar.lodestone.client.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"BackgroundRendererMixin",
+		"GameRendererMixin",
+		"ScreenMixin",
+		"accessor.RenderPhase$ShaderProgramAccessor",
+		"accessor.RenderPhaseAccessor",
+		"accessor.ShaderProgramAccessor",
+		"accessor.SimpleOptionsScreenAccessor",
+		"accessor.GameRendererAccessor",
+		"accessor.RenderLayer$MultiPhaseAccessor",
+		"accessor.RenderLayer$MultiPhaseParametersAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"mixins": [
+	]
+}

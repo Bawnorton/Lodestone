@@ -1,0 +1,11 @@
+accessWidener v2 named
+accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
+accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
+accessible class net/minecraft/client/render/RenderPhase$Transparency
+accessible class net/minecraft/client/render/RenderLayer$MultiPhase
+accessible class net/minecraft/client/render/RenderPhase$TextureBase
+accessible class net/minecraft/client/render/RenderPhase$Cull
+accessible class net/minecraft/client/render/RenderPhase$Lightmap
+accessible class net/minecraft/client/render/BackgroundRenderer$FogData
+
+extendable method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V
