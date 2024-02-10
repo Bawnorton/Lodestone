@@ -17,6 +17,8 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import team.lodestar.lodestone.helpers.DataHelper;
+import team.lodestar.lodestone.helpers.VecHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;

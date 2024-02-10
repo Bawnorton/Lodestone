@@ -7,5 +7,6 @@ accessible class net/minecraft/client/render/RenderPhase$TextureBase
 accessible class net/minecraft/client/render/RenderPhase$Cull
 accessible class net/minecraft/client/render/RenderPhase$Lightmap
 accessible class net/minecraft/client/render/BackgroundRenderer$FogData
+accessible class net/minecraft/enchantment/EnchantmentHelper$Consumer
 
 extendable method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V

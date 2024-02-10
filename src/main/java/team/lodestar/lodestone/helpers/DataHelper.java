@@ -1,4 +1,4 @@
-package team.lodestar.lodestone.client.helpers;
+package team.lodestar.lodestone.helpers;
 
 import net.minecraft.util.math.MathHelper;
 import java.util.*;
