@@ -9,6 +9,7 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
+import team.lodestar.lodestone.attachment.LodestoneServerPlayerDataAttachment;
 import team.lodestar.lodestone.attachment.LodestoneWorldDataAttachment;
 import team.lodestar.lodestone.registry.custom.LodestoneWorldEventTypeRegistry;
 import team.lodestar.lodestone.systems.worldevent.WorldEventInstance;
@@ -18,7 +19,7 @@ import java.util.Iterator;
 public class WorldEventHandler {
     public static void bootstrap() {
         ServerPlayConnectionEvents.JOIN.register(WorldEventHandler::playerJoin);
-        ServerTickEvents.END_WORLD_TICK.register(WorldEventHandler::worldTick);
+        ServerTickEvents.END_WORLD_TICK.register(WorldEventHandler::tick);
     }
 
     public static <T extends WorldEventInstance> T addWorldEvent(World world, T instance) {
@@ -38,17 +39,15 @@ public class WorldEventHandler {
     public static void playerJoin(ServerPlayNetworkHandler networkHandler, PacketSender sender, MinecraftServer server) {
         ServerPlayerEntity player =  networkHandler.player;
         ServerWorld world = player.getServerWorld();
-        LodestonePlayerDataCapability.getCapabilityOptional(player).ifPresent(attachment -> LodestoneWorldDataAttachment.getAttachmentOptional(world).ifPresent(worldCapability -> {
-            for (WorldEventInstance instance : worldCapability.activeWorldEvents) {
-                if (instance.isClientSynced()) {
-                    WorldEventInstance.sync(instance, serverPlayer);
-                }
-            }
-        }));
-    }
-
-    public static void worldTick(ServerWorld world) {
-        tick(world);
+        LodestoneServerPlayerDataAttachment.getAttachmentOptional(player)
+                .flatMap(attachment -> LodestoneWorldDataAttachment.getAttachmentOptional(world))
+                .ifPresent(worldCapability -> {
+                    for (WorldEventInstance instance : worldCapability.activeWorldEvents) {
+                        if (instance.isClientSynced()) {
+                            WorldEventInstance.sync(instance, player);
+                        }
+                    }
+                });
     }
 
     public static void tick(World world) {

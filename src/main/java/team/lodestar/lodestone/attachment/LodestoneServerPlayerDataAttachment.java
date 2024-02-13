@@ -3,12 +3,12 @@ package team.lodestar.lodestone.attachment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.server.network.ServerPlayerEntity;
 import team.lodestar.lodestone.attachment.persistance.ServerPlayerEntityExtender;
-import team.lodestar.lodestone.event.ServerPlayerEvents;
+import team.lodestar.lodestone.events.ServerPlayerEvents;
 import java.util.Optional;
 
 public class LodestoneServerPlayerDataAttachment extends LodestonePlayerDataAttachment {
     public static void bootstrap() {
-        ServerPlayerEvents.EVENT.register((player) -> getAttachmentOptional(player).ifPresent(LodestonePlayerDataAttachment::onPlayerTick));
+        ServerPlayerEvents.TICK_EVENT.register((player) -> getAttachmentOptional(player).ifPresent(LodestonePlayerDataAttachment::onPlayerTick));
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
             if (entity instanceof ServerPlayerEntity player) {
                 getAttachmentOptional(player).ifPresent(attachment -> attachment.hasJoinedBefore = true);

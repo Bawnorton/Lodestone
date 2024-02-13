@@ -1,6 +1,6 @@
 package team.lodestar.lodestone.client.mixin;
 
-import team.lodestar.lodestone.client.event.FogEvents;
+import team.lodestar.lodestone.client.events.types.FogEvents;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;

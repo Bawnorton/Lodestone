@@ -1,6 +1,6 @@
 package team.lodestar.lodestone.client.mixin;
 
-import team.lodestar.lodestone.client.event.ScreenEvents;
+import team.lodestar.lodestone.client.events.types.ScreenEvents;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import org.spongepowered.asm.mixin.Final;

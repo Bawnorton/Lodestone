@@ -21,6 +21,8 @@ public class LodestoneEntityDataAttachment {
         return tag;
     }
 
+    // TODO: Sync to client
+
     public static Optional<LodestoneEntityDataAttachment> getAttachmentOptional(Entity entity) {
         return entity instanceof EntityExtender extender ? Optional.of(extender.lodestone$getAttachment()) : Optional.empty();
     }

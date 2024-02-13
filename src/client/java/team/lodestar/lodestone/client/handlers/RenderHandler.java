@@ -1,6 +1,6 @@
 package team.lodestar.lodestone.client.handlers;
 
-import team.lodestar.lodestone.client.event.FogEvents;
+import team.lodestar.lodestone.client.events.types.FogEvents;
 import team.lodestar.lodestone.client.helpers.RenderHelper;
 import team.lodestar.lodestone.client.systems.rendering.Phases;
 import team.lodestar.lodestone.client.systems.rendering.renderlayer.ShaderUniformHandler;
@@ -43,18 +43,18 @@ public class RenderHandler {
 
         DELAYED_RENDER = VertexConsumerProvider.immediate(BUFFERS, new BufferBuilder(size));
         DELAYED_PARTICLE_RENDER = VertexConsumerProvider.immediate(PARTICLE_BUFFERS, new BufferBuilder(size));
+    }
 
-        FogEvents.RENDER_FOG_EVENT.register((fogStart, fogEnd, shape) -> {
-            FOG_START = fogStart;
-            FOG_END = fogEnd;
-            FOG_SHAPE = shape;
-        });
+    public static void cacheFogData(float fogStart, float fogEnd, FogShape shape) {
+        FOG_START = fogStart;
+        FOG_END = fogEnd;
+        FOG_SHAPE = shape;
+    }
 
-        FogEvents.FOG_COLOUR_EVENT.register((red, green, blue) -> {
-            FOG_RED = red;
-            FOG_GREEN = green;
-            FOG_BLUE = blue;
-        });
+    public static void cacheFogData(float red, float green, float blue) {
+        FOG_RED = red;
+        FOG_GREEN = green;
+        FOG_BLUE = blue;
     }
     
     public static void beginBufferedRendering(MatrixStack matrixStack) {

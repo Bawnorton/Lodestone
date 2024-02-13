@@ -1,4 +1,4 @@
-package team.lodestar.lodestone.client.event;
+package team.lodestar.lodestone.client.events.types;
 
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.event.Event;

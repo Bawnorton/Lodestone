@@ -1,6 +1,6 @@
 package team.lodestar.lodestone.client.registry.custom;
 
-import team.lodestar.lodestone.client.event.ScreenEvents;
+import team.lodestar.lodestone.client.events.types.ScreenEvents;
 import team.lodestar.lodestone.client.mixin.accessor.SimpleOptionsScreenAccessor;
 import com.mojang.serialization.Codec;
 import net.minecraft.client.gui.screen.option.AccessibilityOptionsScreen;

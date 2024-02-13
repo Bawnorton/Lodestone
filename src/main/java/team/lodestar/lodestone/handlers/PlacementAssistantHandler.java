@@ -1,61 +1,59 @@
 package team.lodestar.lodestone.handlers;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import team.lodestar.lodestone.helpers.DataHelper;
-import team.lodestar.lodestone.systems.placementassistance.IPlacementAssistant;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.World;
+import team.lodestar.lodestone.events.PlayerInteractionEvents;
+import team.lodestar.lodestone.systems.placementassistance.PlacementAssistant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PlacementAssistantHandler {
-
-    public static final ArrayList<IPlacementAssistant> ASSISTANTS = new ArrayList<>();
+    public static final List<PlacementAssistant> ASSISTANTS = new ArrayList<>();
     public static int animationTick = 0;
     public static BlockHitResult target;
 
-    public static void registerPlacementAssistants(FMLCommonSetupEvent event) {
-        event.enqueueWork(() -> DataHelper.getAll(new ArrayList<>(ForgeRegistries.BLOCKS.getValues()), b -> b instanceof IPlacementAssistant).forEach(i -> {
-                            IPlacementAssistant assistant = (IPlacementAssistant) i;
-                            ASSISTANTS.add(assistant);
-                        }
-                )
-        );
+    public static void bootstrap() {
+        Registries.BLOCK.stream()
+                .filter(block -> block instanceof PlacementAssistant)
+                .map(block -> (PlacementAssistant) block)
+                .forEach(ASSISTANTS::add);
+
+        PlayerInteractionEvents.INTERACT_BLOCK_EVENT.register(PlacementAssistantHandler::placeBlock);
     }
 
-    public static void placeBlock(PlayerInteractEvent.RightClickBlock event) {
-        Player player = event.getPlayer();
-        Level level = player.level;
-        if (level.isClientSide) {
-            List<Pair<IPlacementAssistant, ItemStack>> assistants = findAssistants(level, player, event.getHitVec());
-            for (Pair<IPlacementAssistant, ItemStack> pair : assistants) {
-                IPlacementAssistant assistant = pair.getFirst();
-                BlockState state = level.getBlockState(event.getPos());
-                assistant.onPlaceBlock(player, level, event.getHitVec(), state, pair.getSecond());
+    public static void placeBlock(PlayerEntity player, Hand hand, BlockHitResult hitResult) {
+        World world = player.getWorld();
+        if(world.isClient()) {
+            List<Pair<PlacementAssistant, ItemStack>> assistants = findAssistants(world, player, hitResult);
+            for (Pair<PlacementAssistant, ItemStack> pair : assistants) {
+                PlacementAssistant assistant = pair.getFirst();
+                BlockState state = world.getBlockState(hitResult.getBlockPos());
+                assistant.onPlaceBlock(player, world, hitResult, state, pair.getSecond());
             }
             animationTick = Math.max(0, animationTick - 5);
         }
     }
 
-    public static void tick(Player player, HitResult hitResult) {
-        Level level = player.level;
-        List<Pair<IPlacementAssistant, ItemStack>> placementAssistants = findAssistants(level, player, hitResult);
+    public static void tick(PlayerEntity player, HitResult hitResult) {
+        World world = player.getWorld();
+        List<Pair<PlacementAssistant, ItemStack>> placementAssistants = findAssistants(world, player, hitResult);
         if (hitResult instanceof BlockHitResult blockHitResult && !blockHitResult.getType().equals(HitResult.Type.MISS)) {
             target = blockHitResult;
-            for (Pair<IPlacementAssistant, ItemStack> pair : placementAssistants) {
-                IPlacementAssistant assistant = pair.getFirst();
-                BlockState state = level.getBlockState(blockHitResult.getBlockPos());
-                assistant.onObserveBlock(player, level, blockHitResult, state, pair.getSecond());
+            for (Pair<PlacementAssistant, ItemStack> pair : placementAssistants) {
+                PlacementAssistant assistant = pair.getFirst();
+                BlockState state = world.getBlockState(blockHitResult.getBlockPos());
+                assistant.onObserveBlock(player, world, blockHitResult, state, pair.getSecond());
             }
         } else {
             target = null;
@@ -71,20 +69,20 @@ public class PlacementAssistantHandler {
         }
     }
 
-    private static List<Pair<IPlacementAssistant, ItemStack>> findAssistants(Level level, Player player, HitResult hitResult) {
+    private static List<Pair<PlacementAssistant, ItemStack>> findAssistants(World world, PlayerEntity player, HitResult hitResult) {
         if (!(hitResult instanceof BlockHitResult)) {
             return Collections.emptyList();
         }
-        return findAssistants(level, player);
+        return findAssistants(world, player);
     }
 
-    private static List<Pair<IPlacementAssistant, ItemStack>> findAssistants(Level level, Player player) {
-        if (level == null || player == null || player.isShiftKeyDown()) {
+    private static List<Pair<PlacementAssistant, ItemStack>> findAssistants(World world, PlayerEntity player) {
+        if (world == null || player == null || player.isSneaking()) {
             return Collections.emptyList();
         }
-        List<Pair<IPlacementAssistant, ItemStack>> matchingAssistants = new ArrayList<>();
-        for (InteractionHand hand : InteractionHand.values()) {
-            ItemStack held = player.getItemInHand(hand);
+        List<Pair<PlacementAssistant, ItemStack>> matchingAssistants = new ArrayList<>();
+        for (Hand hand : Hand.values()) {
+            ItemStack held = player.getStackInHand(hand);
             matchingAssistants.addAll(ASSISTANTS.stream().filter(s -> s.canAssist().test(held)).map(a -> Pair.of(a, held)).collect(Collectors.toCollection(ArrayList::new)));
         }
         return matchingAssistants;

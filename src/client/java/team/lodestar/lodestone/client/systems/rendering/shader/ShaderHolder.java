@@ -27,11 +27,10 @@ public class ShaderHolder {
     }
 
     public ExtendedShaderProgram createProgram(ResourceFactory factory) throws IOException {
-        ShaderHolder shaderHolder = this;
         ExtendedShaderProgram shaderProgram = new ExtendedShaderProgram(factory, shaderLocation, shaderFormat) {
             @Override
             public ShaderHolder getShaderHolder() {
-                return shaderHolder;
+                return ShaderHolder.this;
             }
         };
         this.shaderProgram = shaderProgram;

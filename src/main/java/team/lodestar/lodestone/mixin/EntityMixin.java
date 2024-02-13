@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import team.lodestar.lodestone.attachment.LodestoneEntityDataAttachment;
 import team.lodestar.lodestone.attachment.persistance.EntityExtender;
 
@@ -27,7 +28,7 @@ public abstract class EntityMixin implements EntityExtender {
     }
 
     @Inject(method = "writeNbt", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;writeCustomDataToNbt(Lnet/minecraft/nbt/NbtCompound;)V", shift = At.Shift.AFTER))
-    private void writeNbt(NbtCompound nbt, CallbackInfo ci) {
-        lodestone$attachment.writeNbt(nbt);
+    private void writeNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> cir) {
+        if (lodestone$attachment != null) lodestone$attachment.writeNbt(nbt);
     }
 }

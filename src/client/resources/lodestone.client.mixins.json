@@ -5,9 +5,10 @@
   "client": [
     "BackgroundRendererMixin",
     "ClientPlayerEntityMixin",
+    "ClientPlayerInteractionManagerMixin",
     "GameRendererMixin",
-    "GlStateManagerMixin",
     "ScreenMixin",
+    "ShaderProgramMixin",
     "VertexConsumerMixin",
     "accessor.GameRendererAccessor",
     "accessor.RenderLayer$MultiPhaseAccessor",
@@ -21,5 +22,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "accessor.ParticleManager$SimpleSpriteProviderAccessor"
   ]
 }

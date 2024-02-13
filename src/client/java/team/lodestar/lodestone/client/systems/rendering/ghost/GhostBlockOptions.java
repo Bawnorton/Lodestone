@@ -4,7 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.math.BlockPos;
-import team.lodestar.lodestone.handlers.PlacementAssistantHandler;
+//import team.lodestar.lodestone.handlers.PlacementAssistantHandler;
 import java.awt.Color;
 import java.util.function.Supplier;
 
@@ -20,7 +20,7 @@ public class GhostBlockOptions {
     private GhostBlockOptions(BlockState state) {
         this.blockState = state;
         this.blockPos = BlockPos.ORIGIN;
-        this.alphaSupplier = () -> PlacementAssistantHandler.getCurrentAlpha() * 0.75f;
+//        this.alphaSupplier = () -> PlacementAssistantHandler.getCurrentAlpha() * 0.75f;
         this.scaleSupplier = () -> 1.0F;
     }
 

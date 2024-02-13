@@ -1,6 +1,6 @@
 package team.lodestar.lodestone.client.mixin;
 
-import team.lodestar.lodestone.client.event.RegisterShadersEvent;
+import team.lodestar.lodestone.client.events.types.RegisterShadersEvent;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;

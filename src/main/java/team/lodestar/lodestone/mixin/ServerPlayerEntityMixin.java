@@ -28,6 +28,6 @@ public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExten
 
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
-        lodestone$attachment.writeNbt(nbt);
+        if (lodestone$attachment != null) lodestone$attachment.writeNbt(nbt);
     }
 }

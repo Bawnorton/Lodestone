@@ -1,5 +1,6 @@
 package team.lodestar.lodestone.client.systems.rendering.shader;
 
+import net.fabricmc.fabric.impl.client.rendering.FabricShaderProgram;
 import team.lodestar.lodestone.client.mixin.accessor.ShaderProgramAccessor;
 import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.gl.ShaderProgram;

@@ -11,9 +11,4 @@ public interface EnchantmentHelperAccessor {
     static void invokeForEachEnchantment(EnchantmentHelper.Consumer consumer, Iterable<ItemStack> stacks) {
         throw new AssertionError();
     }
-
-    @Invoker
-    static void invokeForEachEnchantment(EnchantmentHelper.Consumer consumer, ItemStack stack) {
-        throw new AssertionError();
-    }
 }

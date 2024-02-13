@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import team.lodestar.lodestone.mixin.accessor.EnchantmentHelperAccessor;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -86,14 +87,14 @@ public class ItemHelper {
     public static List<ItemStack> getEventResponders(LivingEntity attacker) {
         List<ItemStack> itemStacks = new ArrayList<>();
         ItemStack stack = attacker.getMainHandStack();
-        if (stack.getItem() instanceof EventResponderItem) {
-            itemStacks.add(stack);
-        }
-        attacker.getArmorItems().forEach(s -> {
-            if (s.getItem() instanceof EventResponderItem) {
-                itemStacks.add(s);
-            }
-        });
+//        if (stack.getItem() instanceof EventResponderItem) {
+//            itemStacks.add(stack);
+//        }
+//        attacker.getArmorItems().forEach(s -> {
+//            if (s.getItem() instanceof EventResponderItem) {
+//                itemStacks.add(s);
+//            }
+//        });
         return itemStacks;
     }
 
@@ -103,7 +104,7 @@ public class ItemHelper {
             EnchantmentHelperAccessor.invokeForEachEnchantment(consumer, user.getItemsEquipped());
         }
         if (user instanceof PlayerEntity) {
-            EnchantmentHelperAccessor.invokeForEachEnchantment(consumer, stack);
+            EnchantmentHelperAccessor.invokeForEachEnchantment(consumer, List.of(stack));
         }
     }
 
