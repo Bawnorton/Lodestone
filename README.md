@@ -3,12 +3,12 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
 
 ## TODO
 - [ ] Builtin
-  - [ ] Capabilities or similar (CCA?)
-  - [ ] Config
+  - [x] Capabilities or similar (Gonna refactor to use recently backported Data Attachment API)
+  - [x] Config
   - [ ] Data
   - [ ] Events
   - [ ] Handlers
-  - [ ] Helpers
+  - [x] Helpers
   - [ ] Mixins
   - [ ] Networking
   - [x] Registries (Half-impl, waiting on rest)
@@ -16,7 +16,7 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
   - [ ] Block
     - [ ] Block Entities
   - [ ] Capabilities
-  - [ ] Config Setup
+  - [x] Config Setup
   - [ ] Containers
   - [ ] Datagen
   - [ ] Items
