@@ -1,8 +1,6 @@
 package team.lodestar.lodestone.handlers;
 
 import com.mojang.datafixers.util.Pair;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -11,7 +9,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
-import team.lodestar.lodestone.events.PlayerInteractionEvents;
+import team.lodestar.lodestone.events.types.PlayerInteractionEvents;
 import team.lodestar.lodestone.systems.placementassistance.PlacementAssistant;
 import java.util.ArrayList;
 import java.util.Collections;

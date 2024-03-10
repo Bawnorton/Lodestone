@@ -1,42 +1,34 @@
-//package team.lodestar.lodestone.handlers;
-//
-//import net.minecraft.world.entity.LivingEntity;
-//import net.minecraftforge.event.entity.living.LivingDeathEvent;
-//import net.minecraftforge.event.entity.living.LivingHurtEvent;
-//import team.lodestar.lodestone.helpers.ItemHelper;
-//import team.lodestar.lodestone.systems.item.IEventResponderItem;
-//
-///**
-// * A handler for firing {@link IEventResponderItem} events
-// */
-//public class ItemEventHandler {
-//
-//    public static void respondToDeath(LivingDeathEvent event) {
-//        if (event.isCanceled()) {
-//            return;
-//        }
-//        LivingEntity target = event.getEntityLiving();
-//        LivingEntity attacker = null;
-//        if (event.getSource().getEntity() instanceof LivingEntity directAttacker) {
-//            attacker = directAttacker;
-//        }
-//        if (attacker == null) {
-//            attacker = target.getLastHurtByMob();
-//        }
-//        if (attacker != null) {
-//            LivingEntity finalAttacker = attacker;
-//            ItemHelper.getEventResponders(attacker).forEach(s -> ((IEventResponderItem) s.getItem()).killEvent(event, finalAttacker, target, s));
-//        }
-//    }
-//
-//    public static void respondToHurt(LivingHurtEvent event) {
-//        if (event.isCanceled() || event.getAmount() <= 0) {
-//            return;
-//        }
-//        LivingEntity target = event.getEntityLiving();
-//        if (event.getSource().getEntity() instanceof LivingEntity attacker) {
-//            ItemHelper.getEventResponders(attacker).forEach(s -> ((IEventResponderItem) s.getItem()).hurtEvent(event, attacker, target, s));
-//            ItemHelper.getEventResponders(target).forEach(s -> ((IEventResponderItem) s.getItem()).takeDamageEvent(event, attacker, target, s));
-//        }
-//    }
-//}
+package team.lodestar.lodestone.handlers;
+
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import team.lodestar.lodestone.helpers.ItemHelper;
+import team.lodestar.lodestone.systems.item.EventResponderItem;
+
+/**
+ * A handler for firing {@link EventResponderItem} events
+ */
+public class ItemEventHandler {
+    public static void respondToDeath(LivingEntity killed, DamageSource damageSource) {
+        LivingEntity attacker = null;
+        if (damageSource.getAttacker() instanceof LivingEntity directAttacker) {
+            attacker = directAttacker;
+        }
+        if (attacker == null) {
+            attacker = killed.getLastAttacker();
+        }
+        if (attacker != null) {
+            LivingEntity finalAttacker = attacker;
+            ItemHelper.getEventResponders(attacker).forEach(stack -> ((EventResponderItem) stack.getItem()).killEvent(damageSource, finalAttacker, killed, stack));
+        }
+    }
+
+    public static void respondToHurt(LivingEntity hurt, DamageSource damageSource, float amount) {
+        if (amount <= 0) return;
+
+        if (damageSource.getAttacker() instanceof LivingEntity attacker) {
+            ItemHelper.getEventResponders(attacker).forEach(s -> ((EventResponderItem) s.getItem()).hurtEvent(damageSource, amount, attacker, hurt, s));
+            ItemHelper.getEventResponders(hurt).forEach(s -> ((EventResponderItem) s.getItem()).takeDamageEvent(damageSource, amount, attacker, hurt, s));
+        }
+    }
+}

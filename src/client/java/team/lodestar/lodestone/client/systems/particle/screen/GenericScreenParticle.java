@@ -6,8 +6,8 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
+import team.lodestar.lodestone.client.access.Accessor;
 import team.lodestar.lodestone.client.handlers.ScreenParticleHandler;
-import team.lodestar.lodestone.client.mixin.accessor.ParticleManager$SimpleSpriteProviderAccessor;
 import team.lodestar.lodestone.client.systems.particle.data.GenericParticleData;
 import team.lodestar.lodestone.client.systems.particle.data.color.ColourParticleData;
 import team.lodestar.lodestone.client.systems.particle.data.spin.SpinParticleData;
@@ -71,7 +71,7 @@ public class GenericScreenParticle extends SpriteBillboardScreenParticle {
             pickSprite(0);
         }
         if (getSpritePicker().equals(SimpleParticleOptions.ParticleSpritePicker.LAST_INDEX)) {
-            pickSprite(((ParticleManager$SimpleSpriteProviderAccessor) spriteProvider).getSprites().size() - 1);
+            pickSprite(Accessor.of(spriteProvider).getSprites().size() - 1);
         }
         updateTraits();
     }
@@ -81,8 +81,8 @@ public class GenericScreenParticle extends SpriteBillboardScreenParticle {
     }
 
     public void pickSprite(int spriteIndex) {
-        if (spriteIndex < ((ParticleManager$SimpleSpriteProviderAccessor) spriteProvider).getSprites().size() && spriteIndex >= 0) {
-            setSprite(((ParticleManager$SimpleSpriteProviderAccessor) spriteProvider).getSprites().get(spriteIndex));
+        if (spriteIndex < Accessor.of(spriteProvider).getSprites().size() && spriteIndex >= 0) {
+            setSprite(Accessor.of(spriteProvider).getSprites().get(spriteIndex));
         }
     }
 

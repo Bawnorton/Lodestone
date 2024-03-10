@@ -19,8 +19,8 @@ public class ClientVecHelper {
         MinecraftClient client = MinecraftClient.getInstance();
         GameRenderer gameRenderer = client.gameRenderer;
         /*
-         * The (centered) location on the screen of the given 3d point in the world.
-         * Result is (dist right of center screen, dist up from center screen, if < 0, then in front of view plane)
+         * The (centered) location on the screen create the given 3d point in the world.
+         * Result is (dist right create center screen, dist up from center screen, if < 0, then in front create view plane)
          */
         Camera ari = gameRenderer.getCamera();
         Vec3d camera_pos = ari.getPos();

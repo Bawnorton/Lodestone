@@ -9,5 +9,7 @@ accessible class net/minecraft/client/render/RenderPhase$Lightmap
 accessible class net/minecraft/client/render/BackgroundRenderer$FogData
 accessible class net/minecraft/enchantment/EnchantmentHelper$Consumer
 accessible class net/minecraft/client/particle/ParticleManager$SimpleSpriteProvider
+accessible class net/minecraft/client/render/RenderLayer$OutlineMode
 
 extendable method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder <init> ()V
+extendable method net/minecraft/block/AbstractBlock$Settings <init> ()V

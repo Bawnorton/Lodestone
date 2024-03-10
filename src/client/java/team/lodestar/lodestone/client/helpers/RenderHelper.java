@@ -1,8 +1,5 @@
 package team.lodestar.lodestone.client.helpers;
 
-import team.lodestar.lodestone.client.mixin.accessor.RenderLayer$MultiPhaseAccessor;
-import team.lodestar.lodestone.client.mixin.accessor.RenderLayer$MultiPhaseParametersAccessor;
-import team.lodestar.lodestone.client.mixin.accessor.RenderPhase$ShaderProgramAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
@@ -17,6 +14,8 @@ import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import team.lodestar.lodestone.client.access.Accessor;
+import team.lodestar.lodestone.client.systems.rendering.LodestoneRenderLayer;
 import team.lodestar.lodestone.helpers.DataHelper;
 import team.lodestar.lodestone.helpers.VecHelper;
 import java.util.List;
@@ -28,10 +27,8 @@ public class RenderHelper {
     public static final int FULL_BRIGHT = 0xF000F0;
 
     public static ShaderProgram getShader(RenderLayer renderLayer) {
-        if(renderLayer instanceof RenderLayer$MultiPhaseAccessor multiPhaseAccessor) {
-            RenderLayer$MultiPhaseParametersAccessor parametersAccessor = ((RenderLayer$MultiPhaseParametersAccessor) (Object) multiPhaseAccessor.getPhases());
-            RenderPhase$ShaderProgramAccessor shaderAccessor = (RenderPhase$ShaderProgramAccessor) parametersAccessor.getProgram();
-            Optional<Supplier<ShaderProgram>> shader = shaderAccessor.getSupplier();
+        if(renderLayer instanceof LodestoneRenderLayer lodestoneRenderLayer) {
+            Optional<Supplier<ShaderProgram>> shader = Accessor.of(Accessor.of(lodestoneRenderLayer.multiPhaseParameters).getProgram()).getSupplier();
             if(shader.isPresent()) {
                 return shader.get().get();
             }
@@ -40,9 +37,8 @@ public class RenderHelper {
     }
 
     public static RenderPhase.Transparency getTransparency(RenderLayer renderLayer) {
-        if(renderLayer instanceof RenderLayer$MultiPhaseAccessor multiPhaseAccessor) {
-            RenderLayer$MultiPhaseParametersAccessor parametersAccessor = ((RenderLayer$MultiPhaseParametersAccessor) (Object) multiPhaseAccessor.getPhases());
-            return parametersAccessor.getTransparency();
+        if(renderLayer instanceof LodestoneRenderLayer lodestoneRenderLayer) {
+            return Accessor.of(lodestoneRenderLayer.multiPhaseParameters).getTransparency();
         }
         return null;
     }

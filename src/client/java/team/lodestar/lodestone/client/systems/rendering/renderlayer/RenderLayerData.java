@@ -1,7 +1,8 @@
 package team.lodestar.lodestone.client.systems.rendering.renderlayer;
 
-import team.lodestar.lodestone.client.mixin.accessor.RenderLayer$MultiPhaseAccessor;
+import team.lodestar.lodestone.client.access.Accessor;
 import team.lodestar.lodestone.client.mixin.accessor.RenderLayer$MultiPhaseParametersAccessor;
+import team.lodestar.lodestone.client.systems.rendering.LodestoneRenderLayer;
 import team.lodestar.lodestone.client.systems.rendering.Phases;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase;
@@ -32,28 +33,19 @@ public class RenderLayerData {
         this.transparency = transparency;
     }
 
-    public RenderLayerData(String name, RenderLayer.MultiPhase multiPhase) {
-        RenderLayer$MultiPhaseAccessor accessor = getAccessor(multiPhase);
-        RenderLayer.MultiPhaseParameters parameters = accessor.getPhases();
-        RenderLayer$MultiPhaseParametersAccessor parametersAccessor = getAccessor(parameters);
+    public RenderLayerData(String name, LodestoneRenderLayer renderLayer) {
+        RenderLayer.MultiPhaseParameters parameters = Accessor.of(renderLayer).getPhases();
+        RenderLayer$MultiPhaseParametersAccessor parametersAccessor = Accessor.of(parameters);
         this.name = name;
-        this.vertexFormat = multiPhase.getVertexFormat();
-        this.drawMode = multiPhase.getDrawMode();
+        this.vertexFormat = renderLayer.getVertexFormat();
+        this.drawMode = renderLayer.getDrawMode();
         this.shaderProgram = parametersAccessor.getProgram();
         this.texture = parametersAccessor.getTexture();
         this.cull = parametersAccessor.getCull();
         this.lightmap = parametersAccessor.getLightmap();
     }
 
-    public RenderLayerData(RenderLayer.MultiPhase multiPhase) {
-        this(getAccessor(multiPhase).getName(), multiPhase);
-    }
-
-    private static RenderLayer$MultiPhaseAccessor getAccessor(RenderLayer.MultiPhase multiPhase) {
-        return (RenderLayer$MultiPhaseAccessor) (Object) multiPhase;
-    }
-
-    private static RenderLayer$MultiPhaseParametersAccessor getAccessor(RenderLayer.MultiPhaseParameters multiPhaseParameters) {
-        return (RenderLayer$MultiPhaseParametersAccessor) (Object) multiPhaseParameters;
+    public RenderLayerData(LodestoneRenderLayer renderLayer) {
+        this(Accessor.of(renderLayer).getName(), renderLayer);
     }
 }

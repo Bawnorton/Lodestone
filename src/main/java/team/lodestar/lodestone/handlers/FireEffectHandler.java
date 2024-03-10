@@ -1,8 +1,9 @@
 package team.lodestar.lodestone.handlers;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import team.lodestar.lodestone.attachment.LodestoneEntityDataAttachment;
+import org.jetbrains.annotations.Nullable;
+import team.lodestar.lodestone.attachment.EntityDataAttachment;
+import team.lodestar.lodestone.attachment.LodestoneAttachments;
 import team.lodestar.lodestone.systems.fireeffect.FireEffectInstance;
 
 public class FireEffectHandler {
@@ -20,39 +21,32 @@ public class FireEffectHandler {
         setCustomFireInstance(entity, null);
     }
 
-    public static FireEffectInstance getFireEffectInstance(Entity entity) {
-        return LodestoneEntityDataAttachment.getAttachment(entity).fireEffectInstance;
+    public static @Nullable FireEffectInstance getFireEffectInstance(Entity entity) {
+        EntityDataAttachment attachment = entity.getAttached(LodestoneAttachments.ENTITY_DATA);
+        if (attachment != null) {
+            return attachment.fireEffectInstance;
+        }
+        return null;
     }
 
     public static void setCustomFireInstance(Entity entity, FireEffectInstance instance) {
-        LodestoneEntityDataAttachment.getAttachmentOptional(entity).ifPresent(attachment -> {
-            attachment.fireEffectInstance = instance;
-            if (attachment.fireEffectInstance != null) {
-                if (entity.getFireTicks() > 0) {
-                    entity.setFireTicks(0);
-                }
-            // TODO: Sync to client
-                if (!entity.getWorld().isClient()) {
-//                    attachment.fireEffectInstance.sync(entity);
-                }
+        EntityDataAttachment attachment = new EntityDataAttachment(instance);
+        entity.setAttached(LodestoneAttachments.ENTITY_DATA, attachment);
+        if (attachment.fireEffectInstance != null) {
+            if (entity.getFireTicks() > 0) {
+                entity.setFireTicks(0);
             }
-//            else if (!entity.level.isClientSide) {
-//                LodestonePacketRegistry.ORTUS_CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new ClearFireEffectInstancePacket(entity.getId()));
-//            }
-        });
-    }
-
-    public static void writeNbt(LodestoneEntityDataAttachment attachment, NbtCompound tag) {
-        attachment.writeNbt(tag);
-    }
-
-    public static void readNbt(LodestoneEntityDataAttachment attachment, NbtCompound tag) {
-        attachment.fireEffectInstance = FireEffectInstance.readNbt(tag);
+            if (!entity.getWorld().isClient) {
+                attachment.fireEffectInstance.sync(entity);
+            }
+        } else if (!entity.getWorld().isClient()) {
+//            LodestonePacketRegistry.ORTUS_CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), new ClearFireEffectInstancePacket(entity.getId()));
+        }
     }
 
     /*
     public static class ClientOnly {
-        public static void renderUIFireEffect(Minecraft pMinecraft, PoseStack pPoseStack) {
+        public static void renderUIFireEffect(Minecraft pMinecraft, MatrixStack pPoseStack) {
             if (pMinecraft.player != null) {
                 if (getFireEffectInstance(pMinecraft.player) == null) {
                     return;
@@ -67,7 +61,7 @@ public class FireEffectHandler {
             }
         }
 
-        public static void renderWorldFireEffect(PoseStack pMatrixStack, MultiBufferSource pBuffer, Camera camera, Entity pEntity) {
+        public static void renderWorldFireEffect(MatrixStack pMatrixStack, MultiBufferSource pBuffer, Camera camera, Entity pEntity) {
             if (getFireEffectInstance(pEntity) == null) {
                 return;
             }

@@ -3,10 +3,13 @@
   "package": "team.lodestar.lodestone.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AbstractBlock$SettingsMixin",
     "EntityMixin",
     "ServerPlayerEntityMixin",
+    "accessor.AbstractBlockAccessor",
     "accessor.EnchantmentHelperAccessor",
     "accessor.LivingEntityAccessor",
+    "accessor.SettingsAccessor",
     "accessor.StatusEffectInstanceAccessor"
   ],
   "injectors": {

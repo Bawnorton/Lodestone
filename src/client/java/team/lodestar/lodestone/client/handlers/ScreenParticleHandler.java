@@ -1,16 +1,18 @@
 package team.lodestar.lodestone.client.handlers;
 
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.GameModeSelectionScreen;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
+import org.joml.Matrix4f;
 import team.lodestar.lodestone.client.config.ClientConfig;
+import team.lodestar.lodestone.client.mixin.accessor.HandledScreenAccessor;
+import team.lodestar.lodestone.client.systems.particle.options.ScreenParticleOptions;
 import team.lodestar.lodestone.client.systems.particle.screen.ScreenParticleHolder;
+import team.lodestar.lodestone.client.systems.particle.screen.ScreenParticleItemStackKey;
+import team.lodestar.lodestone.client.systems.particle.screen.ScreenParticleItemStackRetrievalKey;
+import team.lodestar.lodestone.client.systems.particle.screen.ScreenParticleType;
 import team.lodestar.lodestone.client.systems.particle.screen.base.ScreenParticle;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,23 +29,8 @@ import java.util.Map;
 public class ScreenParticleHandler {
 
     /**
-     * Earliest Screen Particles are rendered before nearly every piece of user interface.
-     */
-    public static final ScreenParticleHolder EARLIEST_PARTICLES = new ScreenParticleHolder();
-
-    /**
-     * Early Screen Particles are rendered after other UI elements, but before things like tooltips or other overlays.
-     */
-    public static final ScreenParticleHolder EARLY_PARTICLES = new ScreenParticleHolder();
-
-    /**
-     * Late Screen Particles are rendered after everything else.
-     */
-    public static final ScreenParticleHolder LATE_PARTICLES = new ScreenParticleHolder();
-
-    /**
      * Item Stack Bound Particles are rendered just after an item stack in the inventory. They are ticked the same as other particles.
-     * We use a pair of a boolean and the ItemStack as a key. The boolean sorts item particles based on if the ItemStack in question is in the hotbar or not.
+     * We use a pair create a boolean and the ItemStack as a key. The boolean sorts item particles based on if the ItemStack in question is in the hotbar or not.
      */
     public static final Map<ScreenParticleItemStackKey, ScreenParticleHolder> ITEM_PARTICLES = new HashMap<>();
     public static final Map<ScreenParticleItemStackRetrievalKey, ItemStack> ITEM_STACK_CACHE = new HashMap<>();
@@ -52,7 +39,7 @@ public class ScreenParticleHandler {
     public static ScreenParticleHolder cachedItemParticles = null;
     public static int currentItemX, currentItemY;
 
-    public static final Tessellator TESSELLATOR = new Tessellator();
+    public static final Tessellator TESSELATOR = new Tessellator();
     public static boolean canSpawnParticles;
 
     public static boolean renderingHotbar;
@@ -62,10 +49,6 @@ public class ScreenParticleHandler {
             return;
         }
 
-        EARLIEST_PARTICLES.tick();
-        EARLY_PARTICLES.tick();
-        LATE_PARTICLES.tick();
-
         ITEM_PARTICLES.values().forEach(ScreenParticleHolder::tick);
         ITEM_PARTICLES.values().removeIf(ScreenParticleHolder::isEmpty);
 
@@ -74,7 +57,11 @@ public class ScreenParticleHandler {
         canSpawnParticles = true;
     }
 
-    public static void renderItemStackEarly(ItemStack stack, int x, int y) {
+    public static void renderTick() {
+        canSpawnParticles = false;
+    }
+
+    public static void renderItemStackEarly(MatrixStack matrixStack, ItemStack stack, int x, int y) {
         if (!ClientConfig.ENABLE_SCREEN_PARTICLES.getConfigValue()) {
             return;
         }
@@ -84,12 +71,27 @@ public class ScreenParticleHandler {
                 return;
             }
             if (!stack.isEmpty()) {
-                currentItemX = x + 8;
-                currentItemY = y + 8;
-                ParticleEmitterHandler.ItemParticleSupplier emitter = ParticleEmitterHandler.EMITTERS.get(stack.getItem());
-                if (emitter != null) {
-                    renderParticles(spawnAndPullParticles(client.world, emitter, stack, false));
-                    cachedItemParticles = spawnAndPullParticles(client.world, emitter, stack, true);
+                List<ParticleEmitterHandler.ItemParticleSupplier> emitters = ParticleEmitterHandler.EMITTERS.get(stack.getItem());
+                if (emitters != null) {
+                    currentItemX = x + 8;
+                    currentItemY = y + 8;
+
+
+                    if (currentItemX == 8 && currentItemY == 8) {
+                        final Matrix4f pose = matrixStack.peek().getPositionMatrix();
+                        float xOffset = pose.m30();
+                        float yOffset = pose.m31();
+                        currentItemX += xOffset;
+                        currentItemY += yOffset;
+                    }
+                    else if (!renderingHotbar && client.currentScreen instanceof HandledScreenAccessor handledScreenAccessor) {
+                        currentItemX += handledScreenAccessor.getX();
+                        currentItemY += handledScreenAccessor.getY();
+                    }
+                    for (ParticleEmitterHandler.ItemParticleSupplier emitter : emitters) {
+                        renderParticles(spawnAndPullParticles(client.world, emitter, stack, false));
+                        cachedItemParticles = spawnAndPullParticles(client.world, emitter, stack, true);
+                    }
                 }
             }
         }
@@ -101,9 +103,9 @@ public class ScreenParticleHandler {
         pullFromParticleVault(cacheKey, stack, target, isRenderedAfterItem);
         if (canSpawnParticles) {
             if (isRenderedAfterItem) {
-                emitter.spawnLateParticles(target, world, Minecraft.getInstance().timer.partialTick, stack, currentItemX, currentItemY);
+                emitter.spawnLateParticles(target, world, MinecraftClient.getInstance().getTickDelta(), stack, currentItemX, currentItemY);
             } else {
-                emitter.spawnEarlyParticles(target, world, Minecraft.getInstance().timer.partialTick, stack, currentItemX, currentItemY);
+                emitter.spawnEarlyParticles(target, world, MinecraftClient.getInstance().getTickDelta(), stack, currentItemX, currentItemY);
             }
         }
         ACTIVELY_ACCESSED_KEYS.add(cacheKey);
@@ -133,55 +135,25 @@ public class ScreenParticleHandler {
         }
     }
 
-    public static void renderParticles(TickEvent.RenderTickEvent event) {
-        if (event.phase.equals(TickEvent.Phase.END)) {
-            if (!ClientConfig.ENABLE_SCREEN_PARTICLES.getConfigValue()) {
-                return;
-            }
-            Screen screen = MinecraftClient.getInstance().currentScreen;
-
-            if (screen == null || screen instanceof ChatScreen || screen instanceof GameModeSelectionScreen) {
-                renderEarliestParticles();
-            }
-            renderLateParticles();
-            canSpawnParticles = false;
-        }
-    }
-
-    public static void renderEarliestParticles() {
-        renderParticles(EARLIEST_PARTICLES);
-    }
-
-    public static void renderEarlyParticles() {
-        renderParticles(EARLY_PARTICLES);
-    }
-
-    public static void renderLateParticles() {
-        renderParticles(LATE_PARTICLES);
-    }
-
     public static void renderParticles(ScreenParticleHolder screenParticleTarget) {
-        if (!ClientConfig.ENABLE_SCREEN_PARTICLES.getConfigValue()) {
+        if (false) {//TODO ClientConfig.ENABLE_SCREEN_PARTICLES.getConfigValue()
             return;
         }
         screenParticleTarget.particles.forEach((renderType, particles) -> {
-            renderType.begin(TESSELLATOR.getBuffer(), MinecraftClient.getInstance().getTextureManager());
+            renderType.begin(TESSELATOR.getBuffer(), MinecraftClient.getInstance().getTextureManager());
             for (ScreenParticle next : particles) {
-                next.render(TESSELLATOR.getBuffer());
+                next.render(TESSELATOR.getBuffer());
             }
-            renderType.end(TESSELLATOR);
+            renderType.end(TESSELATOR);
         });
     }
 
     public static void clearParticles() {
-        clearParticles(EARLIEST_PARTICLES);
-        clearParticles(EARLY_PARTICLES);
-        clearParticles(LATE_PARTICLES);
         ITEM_PARTICLES.values().forEach(ScreenParticleHandler::clearParticles);
     }
 
     public static void clearParticles(ScreenParticleHolder screenParticleTarget) {
-        screenParticleTarget.particles.values().forEach(ArrayList::clear);
+        screenParticleTarget.particles.values().forEach(List::clear);
     }
 
     @SuppressWarnings("unchecked")
@@ -189,7 +161,7 @@ public class ScreenParticleHandler {
         MinecraftClient client = MinecraftClient.getInstance();
         ScreenParticleType<T> type = (ScreenParticleType<T>) options.type;
         ScreenParticle particle = type.provider.createParticle(client.world, options, x, y, xMotion, yMotion);
-        List<ScreenParticle> list = screenParticleTarget.particles.computeIfAbsent(options.renderType, (a) -> new ArrayList<>());
+        List<ScreenParticle> list = screenParticleTarget.particles.computeIfAbsent(options.renderLayer, (a) -> new ArrayList<>());
         list.add(particle);
         return particle;
     }

@@ -1,8 +1,11 @@
 package team.lodestar.lodestone.systems.fireeffect;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import team.lodestar.lodestone.handlers.FireEffectHandler;
+import team.lodestar.lodestone.helpers.NBTHelper;
 import team.lodestar.lodestone.registry.custom.LodestoneFireEffectRegistry;
 
 /**
@@ -10,11 +13,23 @@ import team.lodestar.lodestone.registry.custom.LodestoneFireEffectRegistry;
  * You must register a type and can manage a players fire effect through the {@link FireEffectHandler}
  */
 public class FireEffectInstance {
+    public static final Codec<FireEffectInstance> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    FireEffectType.CODEC.fieldOf("type").forGetter(fireEffectInstance -> fireEffectInstance.type),
+                    Codec.INT.fieldOf("duration").forGetter(fireEffectInstance -> fireEffectInstance.duration)
+            ).apply(instance, FireEffectInstance::new)
+    );
+
     public int duration;
     public final FireEffectType type;
 
     public FireEffectInstance(FireEffectType type) {
         this.type = type;
+    }
+
+    private FireEffectInstance(FireEffectType type, int duration) {
+        this.type = type;
+        this.duration = duration;
     }
 
     public FireEffectInstance extendDuration(int increase) {
@@ -24,6 +39,16 @@ public class FireEffectInstance {
 
     public FireEffectInstance setDuration(int duration) {
         this.duration = duration;
+        return this;
+    }
+
+    public FireEffectInstance sync(Entity target) {
+//        LodestoneEntityDataCapability.syncTrackingAndSelf(target, NBTHelper.create("fireEffect", "type", "duration").setWhitelist());
+        return this;
+    }
+
+    public FireEffectInstance syncDuration(Entity target) {
+//        LodestoneEntityDataCapability.syncTrackingAndSelf(target, NBTHelper.create("fireEffect", "duration").setWhitelist());
         return this;
     }
 
@@ -51,22 +76,5 @@ public class FireEffectInstance {
 
     public boolean isValid() {
         return type.isValid(this);
-    }
-
-    public void writeNbt(NbtCompound tag) {
-        NbtCompound fireTag = new NbtCompound();
-        fireTag.putString("type", type.id);
-        fireTag.putInt("duration", duration);
-        tag.put("fireEffect", fireTag);
-    }
-
-    public static FireEffectInstance readNbt(NbtCompound tag) {
-        if (!tag.contains("fireEffect")) {
-            return null;
-        }
-        NbtCompound fireTag = tag.getCompound("fireEffect");
-        FireEffectInstance instance = new FireEffectInstance(LodestoneFireEffectRegistry.FIRE_TYPES.get(fireTag.getString("type")));
-        instance.setDuration(fireTag.getInt("duration"));
-        return instance;
     }
 }

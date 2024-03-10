@@ -7,10 +7,13 @@
     "ClientPlayerEntityMixin",
     "ClientPlayerInteractionManagerMixin",
     "GameRendererMixin",
+    "MinecraftClientMixin",
     "ScreenMixin",
     "ShaderProgramMixin",
     "VertexConsumerMixin",
+    "WorldRendererMixin",
     "accessor.GameRendererAccessor",
+    "accessor.HandledScreenAccessor",
     "accessor.RenderLayer$MultiPhaseAccessor",
     "accessor.RenderLayer$MultiPhaseParametersAccessor",
     "accessor.RenderPhase$ShaderProgramAccessor",
@@ -22,6 +25,11 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "accessor.ParticleManager$SimpleSpriteProviderAccessor"
+    "accessor.BufferRendererAccessor",
+    "accessor.CameraAccessor",
+    "accessor.ParticleManager$SimpleSpriteProviderAccessor",
+    "accessor.RenderLayerAccessor",
+    "accessor.RenderPhase$TextureBaseAccessor",
+    "accessor.WorldRendererAccessor"
   ]
 }

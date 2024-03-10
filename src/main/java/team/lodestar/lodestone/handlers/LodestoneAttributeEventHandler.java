@@ -1,50 +1,52 @@
-//package team.lodestar.lodestone.handlers;
-//
-//import net.minecraft.world.damagesource.DamageSource;
-//import net.minecraft.world.damagesource.EntityDamageSource;
-//import net.minecraft.world.entity.LivingEntity;
-//import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-//import net.minecraftforge.event.entity.living.LivingHurtEvent;
-//import team.lodestar.lodestone.setup.LodestoneAttributeRegistry;
-//
-///**
-// * A handler for common attributes I use in my mods.
-// */
-//public class LodestoneAttributeEventHandler {
-//    public static void processAttributes(LivingHurtEvent event) {
-//        if (event.isCanceled() || event.getAmount() <= 0) {
-//            return;
-//        }
-//        DamageSource source = event.getSource();
-//        LivingEntity target = event.getEntityLiving();
-//        if (source.isMagic()) {
-//            float amount = event.getAmount();
-//            if (source.getEntity() instanceof LivingEntity attacker) {
-//                AttributeInstance magicProficiency = attacker.getAttribute(LodestoneAttributeRegistry.MAGIC_PROFICIENCY.get());
-//                if (magicProficiency != null && magicProficiency.getValue() > 0) {
-//                    amount += magicProficiency.getValue() * 0.5f;
-//                }
-//            }
-//            AttributeInstance magicResistance = target.getAttribute(LodestoneAttributeRegistry.MAGIC_RESISTANCE.get());
-//            if (magicResistance != null && magicResistance.getValue() > 0) {
-//                amount *= applyMagicResistance(magicResistance.getValue());
-//            }
-//            event.setAmount(amount);
-//        }
-//        if (source.getEntity() instanceof LivingEntity attacker) {
-//            if (!source.isMagic()) {
-//                AttributeInstance magicDamage = attacker.getAttribute(LodestoneAttributeRegistry.MAGIC_DAMAGE.get());
-//                if (magicDamage != null) {
-//                    if (magicDamage.getValue() > 0 && target.isAlive()) {
-//                        target.invulnerableTime = 0;
-//                        target.hurt(new EntityDamageSource(DamageSource.MAGIC.getMsgId(), attacker).setMagic(), (float) magicDamage.getValue());
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    public static double applyMagicResistance(double magicResistance) {
-//        return (1 - (0.75 * (1 / (0.2 * (magicResistance+1))))) * 0.8;
-//    }
-//}
+package team.lodestar.lodestone.handlers;
+
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
+import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.world.World;
+import team.lodestar.lodestone.registry.builtin.LodestoneEntityAttributeRegistry;
+import team.lodestar.lodestone.registry.custom.LodestoneTags;
+
+/**
+ * A handler for common attributes I use in my mods.
+ */
+public class LodestoneAttributeEventHandler {
+    public static float processAttributes(LivingEntity hurt, DamageSource damageSource, float amount) {
+        if (amount <= 0) return amount;
+
+        if (damageSource.getTypeRegistryEntry().isIn(LodestoneTags.IS_MAGIC)) {
+            if (damageSource.getAttacker() instanceof LivingEntity attacker) {
+                EntityAttributeInstance magicProficiency = attacker.getAttributeInstance(LodestoneEntityAttributeRegistry.MAGIC_PROFICIENCY);
+                if (magicProficiency != null && magicProficiency.getValue() > 0) {
+                    amount += (float) (magicProficiency.getValue() * 0.5f);
+                }
+            }
+            EntityAttributeInstance magicResistance = hurt.getAttributeInstance(LodestoneEntityAttributeRegistry.MAGIC_RESISTANCE);
+            if (magicResistance != null && magicResistance.getValue() > 0) {
+                amount *= (float) applyMagicResistance(magicResistance.getValue());
+            }
+            return amount;
+        }
+
+        if (!(damageSource.getAttacker() instanceof LivingEntity attacker)) return amount;
+        if (damageSource.getTypeRegistryEntry().isIn(LodestoneTags.IS_MAGIC)) return amount;
+
+        EntityAttributeInstance magicDamage = attacker.getAttributeInstance(LodestoneEntityAttributeRegistry.MAGIC_DAMAGE);
+        if (magicDamage == null || magicDamage.getValue() <= 0 || !hurt.isAlive()) return amount;
+
+        World world = hurt.getWorld();
+        RegistryEntry.Reference<DamageType> damageTypeReference = world.getRegistryManager().getWrapperOrThrow(RegistryKeys.DAMAGE_TYPE).getOrThrow(DamageTypes.MAGIC);
+        DamageSource magic = new DamageSource(damageTypeReference, attacker, attacker);
+        hurt.timeUntilRegen = 0;
+        hurt.damage(magic, (float) magicDamage.getValue());
+        return amount;
+    }
+
+    public static double applyMagicResistance(double magicResistance) {
+        return (1 - (0.75 * (1 / (0.2 * (magicResistance + 1))))) * 0.8;
+    }
+}

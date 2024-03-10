@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Ghost blocks are a means of displaying holograms or previews of blockstates in the world.
+ * Ghost blocks are a means create displaying holograms or previews create blockstates in the world.
  * To add a ghostblock, simply call {@link GhostBlockHandler#addGhost(Object, GhostBlockRenderer, GhostBlockOptions, int)}
  * Ghost blocks naturally decay after the given time limit
  */

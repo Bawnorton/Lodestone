@@ -3,10 +3,10 @@
 	"id": "lodestone",
 	"version": "${version}",
 	"name": "Lodestone",
-	"description": "Library for various tasks including creating VFX effects in Minecraft. Ported from Lodestone by SammySemicolon.",
+	"description": "Library for various tasks including creating VFX effects in Minecraft. Ported by Bawnorton. Original by SammySemicolon.",
 	"authors": [
-		"Bawnorton",
-		"SammySemicolon"
+		"SammySemicolon",
+		"Bawnorton"
 	],
 	"contact": {
 		"homepage": "https://github.com/Bawnorton/Lodestone",
@@ -38,6 +38,6 @@
 		"fabricloader": ">=0.15.6",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": ">=0.92.0"
 	}
 }

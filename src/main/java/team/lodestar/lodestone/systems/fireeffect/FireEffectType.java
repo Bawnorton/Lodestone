@@ -1,10 +1,20 @@
 package team.lodestar.lodestone.systems.fireeffect;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 
 public class FireEffectType {
+    public static final Codec<FireEffectType> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.STRING.fieldOf("id").forGetter(fireEffectType -> fireEffectType.id),
+                    Codec.INT.fieldOf("damage").forGetter(fireEffectType -> fireEffectType.damage),
+                    Codec.INT.fieldOf("tickInterval").forGetter(fireEffectType -> fireEffectType.tickInterval)
+            ).apply(instance, FireEffectType::new)
+    );
+
     public final String id;
     protected final int damage;
     protected final int tickInterval;

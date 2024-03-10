@@ -1,6 +1,7 @@
 package team.lodestar.lodestone.systems.worldevent;
 
-import net.minecraft.nbt.NbtCompound;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import team.lodestar.lodestone.registry.custom.LodestoneWorldEventTypeRegistry;
@@ -10,7 +11,15 @@ import java.util.UUID;
  * World events are tickable instanced objects which are saved in a world capability, which means they are unique per dimension.
  * They can exist on the client and are ticked separately.
  */
-public abstract class WorldEventInstance {
+public class WorldEventInstance {
+    public static final Codec<WorldEventInstance> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                Codec.STRING.fieldOf("uuid").forGetter((event) -> event.uuid.toString()),
+                Codec.STRING.fieldOf("type").forGetter((event) -> event.type.id()),
+                Codec.BOOL.fieldOf("discarded").forGetter((event) -> event.discarded)
+            ).apply(instance, WorldEventInstance::new)
+    );
+
     public UUID uuid; //TODO: figure out why this is here.
     public WorldEventType type;
     public boolean discarded;
@@ -18,6 +27,12 @@ public abstract class WorldEventInstance {
     public WorldEventInstance(WorldEventType type) {
         this.uuid = UUID.randomUUID();
         this.type = type;
+    }
+
+    private WorldEventInstance(String uuid, String typeId, boolean discarded) {
+        this.uuid = UUID.fromString(uuid);
+        this.type = LodestoneWorldEventTypeRegistry.EVENT_TYPES.get(typeId);
+        this.discarded = discarded;
     }
 
     /**
@@ -47,19 +62,6 @@ public abstract class WorldEventInstance {
         discarded = true;
     }
 
-    public NbtCompound serializeNBT(NbtCompound tag) {
-        tag.putUuid("uuid", uuid);
-        tag.putString("type", type.id());
-        tag.putBoolean("discarded", discarded);
-        return tag;
-    }
-
-    public WorldEventInstance deserializeNBT(NbtCompound tag) {
-        uuid = tag.getUuid("uuid");
-        type = LodestoneWorldEventTypeRegistry.EVENT_TYPES.get(tag.getString("type"));
-        discarded = tag.getBoolean("discarded");
-        return this;
-    }
 
     public static <T extends WorldEventInstance> void sync(T instance) {
 //        LodestonePacketRegistry.ORTUS_CHANNEL.send(PacketDistributor.ALL.noArg(), new SyncWorldEventPacket(instance.type.id, true, instance.serializeNBT(new NbtCompound())));

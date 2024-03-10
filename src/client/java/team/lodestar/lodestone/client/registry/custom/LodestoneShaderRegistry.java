@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.render.VertexFormats;
 import team.lodestar.lodestone.Lodestone;
-import team.lodestar.lodestone.client.events.types.RegisterShadersEvent;
+import team.lodestar.lodestone.client.events.types.ShaderEvents;
 import team.lodestar.lodestone.client.systems.rendering.shader.ExtendedShaderProgram;
 import team.lodestar.lodestone.client.systems.rendering.shader.ShaderHolder;
 import java.util.List;
@@ -23,7 +23,7 @@ public final class LodestoneShaderRegistry {
 
 
     public static void bootstrap() {
-        RegisterShadersEvent.EVENT.register(((factory, shaders) -> {
+        ShaderEvents.REGISTER.register(((factory, shaders) -> {
             registerShader(shaders, SILKSTONE_TEXTURE.createProgram(factory));
             registerShader(shaders, PARTICLE.createProgram(factory));
             registerShader(shaders, SCREEN_PARTICLE.createProgram(factory));

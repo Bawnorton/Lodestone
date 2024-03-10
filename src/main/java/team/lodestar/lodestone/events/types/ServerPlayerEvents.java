@@ -1,4 +1,4 @@
-package team.lodestar.lodestone.events;
+package team.lodestar.lodestone.events.types;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

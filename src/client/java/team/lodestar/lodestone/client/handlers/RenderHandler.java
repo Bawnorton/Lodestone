@@ -1,7 +1,12 @@
 package team.lodestar.lodestone.client.handlers;
 
-import team.lodestar.lodestone.client.events.types.FogEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.PostEffectProcessor;
+import net.minecraft.client.render.WorldRenderer;
+import team.lodestar.lodestone.Lodestone;
 import team.lodestar.lodestone.client.helpers.RenderHelper;
+import team.lodestar.lodestone.client.mixin.accessor.WorldRendererAccessor;
 import team.lodestar.lodestone.client.systems.rendering.Phases;
 import team.lodestar.lodestone.client.systems.rendering.renderlayer.ShaderUniformHandler;
 import team.lodestar.lodestone.client.systems.rendering.shader.ExtendedShaderProgram;
@@ -38,11 +43,119 @@ public class RenderHandler {
     public static FogShape FOG_SHAPE;
     public static float FOG_RED, FOG_GREEN, FOG_BLUE;
 
-    public static void init() {
+    public static Framebuffer LODESTONE_DEPTH_CACHE;
+    public static Framebuffer LODESTONE_TRANSLUCENT;
+    public static Framebuffer LODESTONE_TRANSLUCENT_PARTICLE;
+    public static Framebuffer LODESTONE_ADDITIVE;
+    public static Framebuffer LODESTONE_ADDITIVE_PARTICLE;
+
+    public static PostEffectProcessor LODESTONE_POST_EFFECT_PROCESSOR;
+
+    public static void bootstrap() {
         int size = LARGE_BUFFER_SOURCES ? 262144 : 256;
 
         DELAYED_RENDER = VertexConsumerProvider.immediate(BUFFERS, new BufferBuilder(size));
         DELAYED_PARTICLE_RENDER = VertexConsumerProvider.immediate(PARTICLE_BUFFERS, new BufferBuilder(size));
+    }
+    
+    public static void setupLodestoneFramebuffers() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        try {
+            PostEffectProcessor postEffectProcessor = new PostEffectProcessor(client.getTextureManager(), client.getResourceManager(), client.getFramebuffer(), Lodestone.id("shaders/lodestone_post_effect_processor.json"));
+            postEffectProcessor.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
+            LODESTONE_DEPTH_CACHE = postEffectProcessor.getSecondaryTarget("lodestone_depth_cache");
+
+            LODESTONE_TRANSLUCENT = postEffectProcessor.getSecondaryTarget("lodestone_translucent");
+            LODESTONE_TRANSLUCENT_PARTICLE = postEffectProcessor.getSecondaryTarget("lodestone_translucent_particle");
+            LODESTONE_ADDITIVE = postEffectProcessor.getSecondaryTarget("lodestone_additive");
+            LODESTONE_ADDITIVE_PARTICLE = postEffectProcessor.getSecondaryTarget("lodestone_additive_particle");
+
+            LODESTONE_POST_EFFECT_PROCESSOR = postEffectProcessor;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to setup Lodestone frame buffers", e);
+        }
+    }
+    
+    public static void closeLodestoneFramebuffers() {
+        if (LODESTONE_POST_EFFECT_PROCESSOR != null) {
+            LODESTONE_POST_EFFECT_PROCESSOR.close();
+            
+            LODESTONE_DEPTH_CACHE.delete();
+            LODESTONE_TRANSLUCENT.delete();
+            LODESTONE_TRANSLUCENT_PARTICLE.delete();
+            LODESTONE_ADDITIVE.delete();
+            LODESTONE_ADDITIVE_PARTICLE.delete();
+            
+            LODESTONE_POST_EFFECT_PROCESSOR = null;
+            LODESTONE_DEPTH_CACHE = null;
+            LODESTONE_TRANSLUCENT = null;
+            LODESTONE_TRANSLUCENT_PARTICLE = null;
+            LODESTONE_ADDITIVE = null;
+            LODESTONE_ADDITIVE_PARTICLE = null;
+        }
+    }
+    
+    public static void resize(int width, int height) {
+        if (LODESTONE_POST_EFFECT_PROCESSOR != null) {
+            LODESTONE_POST_EFFECT_PROCESSOR.setupDimensions(width, height);
+            LODESTONE_DEPTH_CACHE.resize(width, height, MinecraftClient.IS_SYSTEM_MAC);
+        }
+    }
+    
+    public static void endBatchesEarly() {
+        WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
+        endBatches(((WorldRendererAccessor) worldRenderer).getTransparencyPostProcessor() != null);
+    }
+    
+    public static void endBatchesLate() {
+        WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
+        if (((WorldRendererAccessor) worldRenderer).getTransparencyPostProcessor() != null) {
+            LODESTONE_POST_EFFECT_PROCESSOR.render(MinecraftClient.getInstance().getTickDelta());
+        }
+    }
+
+    public static void endBatches(boolean isFabulous) {
+        WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
+        Matrix4f last = new Matrix4f(RenderSystem.getModelViewMatrix());
+        if (isFabulous) {
+            LODESTONE_DEPTH_CACHE.copyDepthFrom(MinecraftClient.getInstance().getFramebuffer());
+            LODESTONE_TRANSLUCENT_PARTICLE.clear(MinecraftClient.IS_SYSTEM_MAC);
+            LODESTONE_TRANSLUCENT_PARTICLE.copyDepthFrom(MinecraftClient.getInstance().getFramebuffer());
+            LODESTONE_TRANSLUCENT_PARTICLE.beginWrite(false);
+        }
+        beginBufferedRendering();
+        renderBufferedParticles(true);
+        if (RenderHandler.MATRIX4F != null) {
+            RenderSystem.getModelViewMatrix().set(MATRIX4F);
+        }
+        if (isFabulous) {
+            LODESTONE_TRANSLUCENT_PARTICLE.endWrite();
+            LODESTONE_TRANSLUCENT.clear(MinecraftClient.IS_SYSTEM_MAC);
+            LODESTONE_TRANSLUCENT.copyDepthFrom(MinecraftClient.getInstance().getFramebuffer());
+            LODESTONE_TRANSLUCENT.beginWrite(false);
+        }
+        renderBufferedBatches(true);
+        if (isFabulous) {
+            LODESTONE_TRANSLUCENT.endWrite();
+            LODESTONE_ADDITIVE.clear(MinecraftClient.IS_SYSTEM_MAC);
+            LODESTONE_ADDITIVE.copyDepthFrom(MinecraftClient.getInstance().getFramebuffer());
+            LODESTONE_ADDITIVE.beginWrite(false);
+        }
+        renderBufferedBatches(false);
+        RenderSystem.getModelViewMatrix().set(last);
+        if (isFabulous) {
+            LODESTONE_ADDITIVE.endWrite();
+            LODESTONE_ADDITIVE_PARTICLE.clear(MinecraftClient.IS_SYSTEM_MAC);
+            LODESTONE_ADDITIVE_PARTICLE.copyDepthFrom(MinecraftClient.getInstance().getFramebuffer());
+            LODESTONE_ADDITIVE_PARTICLE.beginWrite(false);
+        }
+        renderBufferedParticles(false);
+
+        endBufferedRendering();
+        if (isFabulous) {
+            LODESTONE_ADDITIVE_PARTICLE.endWrite();
+            worldRenderer.getCloudsFramebuffer().beginWrite(false);
+        }
     }
 
     public static void cacheFogData(float fogStart, float fogEnd, FogShape shape) {
@@ -57,12 +170,7 @@ public class RenderHandler {
         FOG_BLUE = blue;
     }
     
-    public static void beginBufferedRendering(MatrixStack matrixStack) {
-        matrixStack.push();
-        RenderSystem.enableCull();
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(false);
-
+    public static void beginBufferedRendering() {
         float[] shaderFogColor = RenderSystem.getShaderFogColor();
         float fogRed = shaderFogColor[0];
         float fogGreen = shaderFogColor[1];
@@ -85,13 +193,11 @@ public class RenderHandler {
         FOG_SHAPE = shaderFogShape;
     }
     
-    public static void endBufferedRendering(MatrixStack matrixStack) {
+    public static void endBufferedRendering() {
         RenderSystem.setShaderFogStart(FOG_START);
         RenderSystem.setShaderFogEnd(FOG_END);
         RenderSystem.setShaderFogShape(FOG_SHAPE);
         RenderSystem.setShaderFogColor(FOG_RED, FOG_GREEN, FOG_BLUE);
-
-        matrixStack.pop();
     }
 
     public static void renderBufferedParticles(boolean transparentOnly) {

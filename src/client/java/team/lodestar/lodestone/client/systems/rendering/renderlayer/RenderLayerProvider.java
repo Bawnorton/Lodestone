@@ -1,18 +1,18 @@
 package team.lodestar.lodestone.client.systems.rendering.renderlayer;
 
-import team.lodestar.lodestone.client.registry.LodestoneClientRegistries;
-import team.lodestar.lodestone.client.registry.custom.LodestoneRenderLayerRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import team.lodestar.lodestone.client.registry.custom.LodestoneRenderLayerRegistry;
+import team.lodestar.lodestone.client.systems.rendering.LodestoneRenderLayer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RenderLayerProvider {
-    private final Function<Identifier, RenderLayer> function;
-    private final Function<Identifier, RenderLayer> memoizedFunction;
+    private final Function<Identifier, LodestoneRenderLayer> function;
+    private final Function<Identifier, LodestoneRenderLayer> memoizedFunction;
 
-    public RenderLayerProvider(Function<Identifier, RenderLayer> function) {
+    public RenderLayerProvider(Function<Identifier, LodestoneRenderLayer> function) {
         this.function = function;
         this.memoizedFunction = Util.memoize(function);
     }

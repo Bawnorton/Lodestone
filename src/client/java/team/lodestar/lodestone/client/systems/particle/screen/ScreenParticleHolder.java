@@ -2,7 +2,6 @@ package team.lodestar.lodestone.client.systems.particle.screen;
 
 import team.lodestar.lodestone.client.systems.particle.renderlayer.LodestoneScreenParticleRenderLayer;
 import team.lodestar.lodestone.client.systems.particle.screen.base.ScreenParticle;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +28,6 @@ public class ScreenParticleHolder {
     }
 
     public boolean isEmpty() {
-        return particles.values().stream().allMatch(ArrayList::isEmpty);
+        return particles.values().stream().allMatch(List::isEmpty);
     }
 }
