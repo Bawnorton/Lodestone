@@ -7,7 +7,7 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
   - [x] Config
   - [ ] Data
   - [ ] Events
-  - [ ] Handlers
+  - [x] Handlers
   - [x] Helpers
   - [ ] Mixins
   - [ ] Networking
@@ -15,7 +15,7 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
 - [ ] Systems (For other mods to use)
   - [ ] Block
     - [ ] Block Entities
-  - [ ] Capabilities
+  - [x] Capabilities
   - [x] Config Setup
   - [ ] Containers
   - [ ] Datagen
@@ -23,12 +23,10 @@ An organic port of the forge mod [Lodestone](https://github.com/LodestarMC/Lodes
   - [ ] Models
   - [ ] Mutliblocks
   - [ ] Networking
-  - [ ] Particles
-    - [ ] Lot going on here
+  - [x] Particles
   - [ ] Post processing
   - [ ] Recipes
-  - [ ] Rendering
-    - [ ] Also a lot going on here
+  - [x] Rendering
   - [ ] Sound
   - [ ] Textures
   - [ ] World events
